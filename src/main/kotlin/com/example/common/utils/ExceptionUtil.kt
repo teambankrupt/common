@@ -12,7 +12,10 @@ import com.example.common.exceptions.notfound.NotFoundException
  */
 
 class ExceptionUtil {
+
     companion object {
+        @JvmStatic
+        val MSG_UNAUTHORIZED = "You're not authorized to access this resource."
 
         fun forbidden(message: String): ForbiddenException {
             return ForbiddenException(message)
