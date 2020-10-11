@@ -1,5 +1,6 @@
 package com.example.common.utils
 
+import com.example.common.exceptions.exists.AlreadyExistsException
 import com.example.common.exceptions.forbidden.ForbiddenException
 import com.example.common.exceptions.invalid.InvalidException
 import com.example.common.exceptions.notfound.NotFoundException
@@ -35,6 +36,10 @@ class ExceptionUtil {
 
         fun wtf(message: String): RuntimeException {
             return RuntimeException(message)
+        }
+
+        fun exists(message: String): AlreadyExistsException {
+            return AlreadyExistsException(message)
         }
 
     }
