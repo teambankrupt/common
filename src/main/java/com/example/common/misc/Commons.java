@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class Commons {
     private Commons() {
@@ -33,9 +35,9 @@ public final class Commons {
 
         return lastElement;
     }
-    
+
     // FIXME: UNCOMMENT THESE METHODS ON NEXT COMMIT
-    
+
 //      public static ResponseEntity<Resource> buildFileDownloadResponse(String filePath, String fileName) throws FileNotFoundException {
 //         File file = new File(filePath);
 //         return buildDownloadResponse(file, fileName);
@@ -105,6 +107,7 @@ public final class Commons {
 //         }
 //         return costs[s2.length()];
 //     }
+
     /**
      * Calculates the similarity (a number within 0 and 1) between two strings.
      */
@@ -152,6 +155,12 @@ public final class Commons {
                 costs[s2.length()] = lastValue;
         }
         return costs[s2.length()];
+    }
+
+    public static boolean containsSpecialCharacter(String str) {
+        Pattern p = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(str);
+        return m.find();
     }
 
 }
