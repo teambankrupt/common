@@ -1,5 +1,7 @@
 package com.example.common.utils;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -16,6 +18,10 @@ public class SessionIdentifierGenerator {
 
     public static int generateOTP() {
         return 100000 + random.nextInt(89999);
+    }
+
+    public static String alphanumeric(int size) {
+        return RandomStringUtils.randomAlphanumeric(size).toUpperCase();
     }
 
 }
