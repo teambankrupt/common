@@ -163,4 +163,9 @@ public final class Commons {
         return m.find();
     }
 
+    public static String summary(String string, int length) {
+        if (string == null) return null;
+        return string.substring(0, Math.min(string.length(), length));
+    }
+
 }
