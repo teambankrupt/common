@@ -1,12 +1,20 @@
 package com.example.common.utils;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class NetworkUtil {
 
@@ -37,4 +45,18 @@ public final class NetworkUtil {
 //        InputStream is = e.getContent();
     }
 
+    public static CloseableHttpResponse postFormData(String url, String authorization, Map<String, String> bodyParams) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url.replace(" ", "%20"));
+        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpPost.setHeader("Authorization", authorization);
+
+        List<NameValuePair> params = bodyParams
+                .entrySet()
+                .stream()
+                .map(e -> new BasicNameValuePair(e.getKey(), e.getValue())).collect(Collectors.toList());
+        httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+        return client.execute(httpPost);
+    }
 }
