@@ -1,5 +1,6 @@
 package com.example.common.utils;
 
+import com.example.common.models.DuplicateParamEntry;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -10,8 +11,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -59,4 +58,20 @@ public final class NetworkUtil {
 
         return client.execute(httpPost);
     }
+
+    public static CloseableHttpResponse postFormData(String url, String authorization, List<DuplicateParamEntry> bodyParams) throws IOException {
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url.replace(" ", "%20"));
+        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        httpPost.setHeader("Authorization", authorization);
+
+        List<NameValuePair> params = bodyParams
+                .stream()
+                .map(a -> new BasicNameValuePair(a.getKey(), a.getValue())).collect(Collectors.toList());
+        httpPost.setEntity(new UrlEncodedFormEntity(params));
+
+        return client.execute(httpPost);
+    }
+
+
 }
