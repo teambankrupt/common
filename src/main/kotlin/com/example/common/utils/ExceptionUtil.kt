@@ -30,6 +30,10 @@ class ExceptionUtil {
             return NotFoundException("Could not find $entityName with id: $id")
         }
 
+        fun notFound(klass: Class<*>, id: Long): NotFoundException {
+            return NotFoundException("Could not find ${klass.simpleName} with id: $id")
+        }
+
         fun invalid(message: String): InvalidException {
             return InvalidException(message)
         }
