@@ -21,7 +21,7 @@ public class SessionIdentifierGenerator {
     }
 
     public static String alphanumeric(int size) {
-        return RandomStringUtils.randomAlphanumeric(size).toUpperCase();
+        return RandomStringUtils.randomAlphanumeric(size);
     }
 
 }
