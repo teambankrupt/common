@@ -1,6 +1,6 @@
 package com.example.common.exceptions.notfound;
 
-public class NotFoundException extends Throwable {
+public class NotFoundException extends RuntimeException {
     public NotFoundException() {
         super();
     }

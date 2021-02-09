@@ -1,6 +1,6 @@
 package com.example.common.exceptions.forbidden;
 
-public class ForbiddenException extends Throwable{
+public class ForbiddenException extends RuntimeException{
     public ForbiddenException() {
         super();
     }

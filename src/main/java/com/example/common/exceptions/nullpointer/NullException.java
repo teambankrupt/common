@@ -1,6 +1,6 @@
 package com.example.common.exceptions.nullpointer;
 
-public class NullException extends Throwable{
+public class NullException extends RuntimeException{
     public NullException() {
         super();
     }

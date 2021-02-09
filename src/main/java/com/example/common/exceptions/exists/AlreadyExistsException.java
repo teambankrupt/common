@@ -1,6 +1,6 @@
 package com.example.common.exceptions.exists;
 
-public class AlreadyExistsException extends Throwable {
+public class AlreadyExistsException extends RuntimeException {
     public AlreadyExistsException() {
     }
 

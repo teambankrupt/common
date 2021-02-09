@@ -1,6 +1,6 @@
 package com.example.common.exceptions.invalid;
 
-public class InvalidException extends Throwable{
+public class InvalidException extends RuntimeException{
     public InvalidException() {
     }
 

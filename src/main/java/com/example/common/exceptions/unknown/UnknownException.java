@@ -1,6 +1,6 @@
 package com.example.common.exceptions.unknown;
 
-public class UnknownException extends Throwable{
+public class UnknownException extends RuntimeException{
     public UnknownException() {
         super();
     }
