@@ -2,13 +2,18 @@ package com.example.common.utils;
 
 import com.example.common.models.DuplicateParamEntry;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -73,5 +78,63 @@ public final class NetworkUtil {
         return client.execute(httpPost);
     }
 
+    public static String getResponseFromHttpPut(String url, String body, String authorization) throws IOException {
+        String jsonString = null;
+        CloseableHttpClient client = HttpClients.createDefault();
+        String newUrl = url.replace(" ", "%20");
+        HttpPut httpPost = new HttpPut(newUrl);
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setCookieSpec(CookieSpecs.DEFAULT)
+                .build();
+        httpPost.setConfig(requestConfig);
+
+        if (body != null && !body.isEmpty()) {
+            StringEntity entity = new StringEntity(body, "UTF-8");
+            httpPost.setEntity(entity);
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");
+            httpPost.setHeader("Authorization", authorization);
+            System.out.println("\n-------------------------------- Request Body to URL -> " + url + " -----------------------------------------------\n");
+            System.out.println(EntityUtils.toString(entity));
+        }
+        try {
+            CloseableHttpResponse response = client.execute(httpPost);
+            jsonString = EntityUtils.toString(response.getEntity());
+            System.out.println(response);
+            System.out.println("\n-------------------------------- Response for URL -> " + url + " -----------------------------------------------\n");
+            System.out.println(jsonString);
+            client.close();
+            response.close();
+        } catch (IOException ignored) {
+
+        }
+        return jsonString;
+    }
+
+    public static String getResponseFromGETRequest(String url, String authorization) throws IOException {
+
+        String jsonString = null;
+        CloseableHttpClient client = HttpClients.createDefault();
+        String newUrl = url.replace(" ", "%20");
+        HttpGet httpGet = new HttpGet(newUrl);
+
+        httpGet.setHeader("Accept", "application/json");
+        httpGet.setHeader("Content-type", "application/json");
+        httpGet.setHeader("Authorization", authorization);
+
+        try {
+            CloseableHttpResponse response = client.execute(httpGet);
+            jsonString = EntityUtils.toString(response.getEntity());
+            System.out.println(response);
+            System.out.println("\n-------------------------------- Response for URL -> " + url + " -----------------------------------------------\n");
+            System.out.println(jsonString);
+            client.close();
+            response.close();
+        } catch (IOException ignored) {
+
+        }
+        return jsonString;
+    }
 
 }
