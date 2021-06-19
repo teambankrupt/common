@@ -1,9 +1,7 @@
 package com.example.common.misc;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,4 +94,16 @@ public final class Commons {
         return string.substring(0, Math.min(string.length(), length));
     }
 
+    public static Set<String> matchPlaceholders(String text) {
+        return matchPlaceholders("\\[(\\w*?)\\]", text);
+    }
+
+    public static Set<String> matchPlaceholders(String regex, String text) {
+        Matcher m = Pattern.compile(regex).matcher(text);
+        HashSet<String> elements = new HashSet<>();
+        while (m.find()) {
+            elements.add(m.group(1));
+        }
+        return elements;
+    }
 }
