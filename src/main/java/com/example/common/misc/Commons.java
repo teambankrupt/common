@@ -106,4 +106,12 @@ public final class Commons {
         }
         return elements;
     }
+
+    public static String replacePlaceholders(String text, Map<String, String> placeholderValues) {
+        for (Map.Entry<String, String> ph : placeholderValues.entrySet()) {
+            // replace placeholders with capture groups
+            text = text.replace("[" + ph.getKey() + "]", ph.getValue());
+        }
+        return text;
+    }
 }
