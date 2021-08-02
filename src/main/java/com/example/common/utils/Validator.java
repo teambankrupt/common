@@ -25,13 +25,13 @@ public final class Validator {
     }
 
     @NotNull
-    public static Boolean isValidPhoneNumber(@NotNull String phone) {
+    public static Boolean isValidPhoneNumber(@NotNull String region, @NotNull String phone) {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
         Phonenumber.PhoneNumber phoneNumber = null;
         try {
             //BD is default country code for Bangladesh (used for number without 880 at the begginning)
-            phoneNumber= phoneUtil.parse(phone, "BD");
+            phoneNumber = phoneUtil.parse(phone, region);
         } catch (NumberParseException e) {
             System.err.println("NumberParseException was thrown: " + e.toString());
         }
