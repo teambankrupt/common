@@ -5,6 +5,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,8 +25,7 @@ public final class Validator {
         return text != null && !text.isEmpty();
     }
 
-    @NotNull
-    public static Boolean isValidPhoneNumber(@NotNull String region, @NotNull String phone) {
+    public static boolean isValidPhoneNumber(@NotNull String region, @NotNull String phone) {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
         Phonenumber.PhoneNumber phoneNumber = null;
@@ -38,7 +38,6 @@ public final class Validator {
         return phoneUtil.isValidNumber(phoneNumber); // returns true
     }
 
-    @NotNull
     public static boolean isValidEmail(@NotNull String email) {
         return isValid(email, "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$");
     }
@@ -51,5 +50,14 @@ public final class Validator {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
         return matcher.matches();
+    }
+
+    public static boolean isValidUrl(String url) {
+        try {
+            new URL(url).toURI();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
