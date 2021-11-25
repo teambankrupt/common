@@ -1,9 +1,11 @@
 package com.example.common.utils;
 
-import java.time.Instant;
-import java.time.ZoneId;
+import org.springframework.cglib.core.Local;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 public class TimeUtility {
@@ -33,6 +35,18 @@ public class TimeUtility {
                 .withLocale(Locale.US)
                 .withZone(ZoneId.systemDefault());
         return formatter.format(instant);
+    }
+
+    public static Instant getDayStart(Instant instant) {
+        LocalDate localDate = LocalDateTime.ofInstant(instant, ZoneOffset.UTC).toLocalDate();
+        return localDate.atStartOfDay().toInstant(ZoneOffset.UTC);
+    }
+
+    public static Instant getDayEnd(Instant instant) {
+        return instant
+                .plus(1, ChronoUnit.DAYS)
+                .truncatedTo(ChronoUnit.DAYS)
+                .minusMillis(1);
     }
 
 }
