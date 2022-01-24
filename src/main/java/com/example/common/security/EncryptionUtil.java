@@ -1,14 +1,17 @@
 package com.example.common.security;
 
+import com.example.common.utils.ExceptionUtil;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Enumeration;
 import java.util.Locale;
 
 public class EncryptionUtil implements Serializable {
@@ -74,7 +77,8 @@ public class EncryptionUtil implements Serializable {
         }
     }
 
-    public void storeSymmetricKey(String alias, String key, String password) {
+    public EncryptionUtil storeSymmetricKey(String alias, String key, String password) {
+        if (key == null) throw new RuntimeException("Key can't be null");
         if (password == null) throw new RuntimeException("Key password can't be null!");
 
         byte[] keyBytes = key.getBytes();
@@ -90,6 +94,7 @@ public class EncryptionUtil implements Serializable {
         } catch (KeyStoreException e) {
             e.printStackTrace();
         }
+        return EncryptionUtilLoader.INSTANCE;
     }
 
     public String retrieveSymmetricKey(String alias, String password) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
@@ -97,6 +102,5 @@ public class EncryptionUtil implements Serializable {
         if (key == null) return null;
         return new String(key.getEncoded());
     }
-
 
 }
