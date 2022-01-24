@@ -1,6 +1,8 @@
 package com.example.common.models;
 
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.util.Base64;
 
 public class AsymmetricKeyCredentials {
     private final String privateKey;
@@ -23,5 +25,25 @@ public class AsymmetricKeyCredentials {
 
     public Certificate getCert() {
         return cert;
+    }
+
+    public String getCertEncoded() {
+        final String LINE_SEPARATOR = System.getProperty("line.separator");
+        final Base64.Encoder encoder = Base64.getMimeEncoder(64, LINE_SEPARATOR.getBytes());
+        try {
+            return encoder.encodeToString(this.cert.getEncoded());
+        } catch (CertificateEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return "AsymmetricKeyCredentials{" +
+                "privateKey='" + privateKey + '\'' +
+                ", publicKey='" + publicKey + '\'' +
+                ", cert=" + this.getCertEncoded() +
+                '}';
     }
 }

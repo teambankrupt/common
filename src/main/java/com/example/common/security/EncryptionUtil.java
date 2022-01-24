@@ -100,7 +100,7 @@ public class EncryptionUtil implements Serializable {
         KeyStore.ProtectionParameter pwd
                 = new KeyStore.PasswordProtection(password.toCharArray());
         try {
-            logger.info("Storing key entry for alias: " + alias + " | secret: " + secret + " | Passphrase: " + pwd);
+            logger.debug("Storing key entry for alias: " + alias + " | secret: " + secret + " | Passphrase: " + pwd);
             keyStore.setEntry(alias, secret, pwd);
             writeKeyStore(keyStore, ksFile, ksPassword.toCharArray(), true);
         } catch (KeyStoreException e) {
@@ -118,9 +118,10 @@ public class EncryptionUtil implements Serializable {
         );
     }
 
-    public String retrieveSymmetricKey(String alias, String password) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
+    public String retrieveSymmetricKey(@NotNull String alias, @NotNull String password) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
         Key key = keyStore.getKey(alias, password.toCharArray());
         if (key == null) return null;
+//        return Base64.getEncoder().encodeToString(key.getEncoded());
         return new String(key.getEncoded());
     }
 
@@ -160,7 +161,7 @@ public class EncryptionUtil implements Serializable {
         String certStr = BEGIN_CERT + LINE_SEPARATOR + encodedCertText + LINE_SEPARATOR + END_CERT;
         File file = new File(fileName);
         if (!file.exists()) file.createNewFile();
-        FileUtils.writeStringToFile(file,certStr, StandardCharsets.UTF_8);
+        FileUtils.writeStringToFile(file, certStr, StandardCharsets.UTF_8);
         return file;
     }
 
