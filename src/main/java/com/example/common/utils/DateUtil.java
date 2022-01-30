@@ -1,6 +1,9 @@
 package com.example.common.utils;
 
+import org.apache.commons.lang3.time.DateUtils;
+
 import java.text.DateFormat;
+import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -19,6 +22,20 @@ public final class DateUtil {
     public static String DATE_PATTERN_READABLE = "MMM dd, YYYY";
     public static String TIME_PATTERN_READABLE = "hh:mm a";
     public static String DATE_TIME_PATTERN_READABLE = "MMM dd, YYYY hh:mm a";
+
+
+    public static final String SERVER_DATE_TIME_PATTERN2 = "yyyy-MM-dd'T'HH:mm";
+    public static final String DATE_PATTERN_READABLE_dd_MM_yyyy = "dd-MM-yyyy";
+    public static final String DATE_PATTERN_READABLE_MONTH_YEAR = "MMM, yy";
+    public static final String DATE_PATTERN_READABLE_DAY_NAME = "MMM dd, YYYY EEEE";
+    public static final String DATE_PATTERN_DAY_MONTH_NAME = "MMMM dd, YYYY EEEE";
+    public static final String DATE_PATTERN_SMS_REPORT = "dd-MM-yy: hh-mm";
+    public static final String DATE_PATTERN_SMS_REPORT_TEMP = "dd-MM-yy";
+    public static final String DATE_PATTERN_REPORT_TEMP = "dd/MM/yyyy";
+    public static final String DATE_PATTERN_DOTTED = "dd.MM.yy";
+    public static final String DATE_PATTERN_DOTTED_2 = "dd.MM.yyyy";
+    public static final String DATE_PATTERN_MONTH = "MMMM";
+    public static final String DATE_PATTERN_MONTH_YEAR_COMPACT = "MMyy";
 
 
     public static String getReadableDate(Date date) {
@@ -56,6 +73,19 @@ public final class DateUtil {
         return new SimpleDateFormat(SERVER_DATE_TIME_PATTERN);
     }
 
+    public static String getReadableDateWithDayName(Date date, String pattern) {
+        return new SimpleDateFormat(pattern).format(date);
+    }
+
+    public static String getDateType(Date date) {
+        Date lastWeekDay = getWeekDayEnd(date);
+        return date.getDate() + " - " + lastWeekDay.getDate() + ", " + getMonthNameFromDate(date);
+    }
+
+    public static String getMonthNameFromDate(Date date) {
+        Format formatter = new SimpleDateFormat("MMMM");
+        return formatter.format(date);
+    }
 
     public static java.time.Period getAge(Date date) {
         if (date == null) return null;
@@ -104,6 +134,59 @@ public final class DateUtil {
         calendar.setTime(getDayStart(calendar.getTime()));
         calendar.add(Calendar.SECOND, -2);
         return calendar.getTime();
+    }
+
+    public static Date getMonthStartDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+        return getDayStart(calendar.getTime());
+    }
+
+
+    public static Date getMonthEndDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        getEndOfDay(calendar);
+        return getLastDayOfMonth(calendar.getTime());
+    }
+
+    public static Date getLastDayOfMonth(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        calendar.add(Calendar.MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.add(Calendar.DATE, -1);
+
+        return calendar.getTime();
+    }
+
+    public static Date getFirstMonthOfStartDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        calendar.add(Calendar.MONTH, Calendar.JANUARY);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+
+        return getMonthStartDate(calendar.getTime());
+    }
+
+    public static Date getLastMonthOfEndDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        calendar.add(Calendar.MONTH, Calendar.DECEMBER);
+        calendar.set(Calendar.DAY_OF_MONTH, 31);
+
+        return getMonthEndDate(calendar.getTime());
+    }
+
+    public static Calendar getEndOfDay(Calendar date) {
+        date.setTime(DateUtils.addMilliseconds(DateUtils.ceiling(date.getTime(), Calendar.DATE), -1));
+        date.set(Calendar.MILLISECOND, 0);
+        return date;
     }
 
     public static Map<DateRangeType, Calendar> buildDateRange(Period period) {
@@ -216,6 +299,64 @@ public final class DateUtil {
         dateRangeMap.put(DateRangeType.DATE_FROM, dateFrom);
         dateRangeMap.put(DateRangeType.DATE_TO, dateTo);
         return dateRangeMap;
+    }
+
+    public static Set<Date> getMonthBetween(Date fromDate, Date toDate) throws ParseException {
+        Set<Date> dates = new TreeSet<>();
+        Calendar min = Calendar.getInstance();
+        Calendar max = Calendar.getInstance();
+
+        min.setTime(fromDate);
+        min.set(min.get(Calendar.YEAR), min.get(Calendar.MONTH), 1);
+
+        max.setTime(toDate);
+        max.set(max.get(Calendar.YEAR), max.get(Calendar.MONTH), 2);
+
+        while (min.before(max)) {
+            dates.add(min.getTime());
+            min.add(Calendar.MONTH, 1);
+        }
+        return dates;
+    }
+
+    public static List<Date> getWeeksBetween(Date startDate, Date endDate) {
+        List<Date> weeksInRange = new ArrayList<>();
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(startDate);
+        calendar.setFirstDayOfWeek(Calendar.SATURDAY);
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+
+        Date weekLastDay = getWeekDayEnd(calendar.getTime());
+        if (!weekLastDay.equals(startDate)) weeksInRange.add(calendar.getTime());
+
+        Calendar endCalendar = new GregorianCalendar();
+        endCalendar.setTime(endDate);
+
+        int maxWeekNumber = calendar.getActualMaximum(Calendar.WEEK_OF_MONTH);
+        for (int i = 0; i < maxWeekNumber; i++) {
+            // Set the calendar to monday of the current week
+            calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
+
+            // Print dates of the current week starting on Monday
+            DateFormat df = new SimpleDateFormat("EEE dd/MM/yyyy");
+            for (int j = 0; j < 7; j++) {
+                calendar.add(Calendar.DATE, 1);
+            }
+            Date result = calendar.getTime();
+            Date weekEndDate = getWeekDayEnd(result);
+            if (result.before(endDate) && (weekEndDate.after(endDate) || weekEndDate.before(endDate)))
+                weeksInRange.add(result);
+        }
+        return weeksInRange;
+    }
+
+    public static Date getWeekDayEnd(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DAY_OF_MONTH, 7);
+        calendar.setTime(getDayStart(calendar.getTime()));
+        calendar.add(Calendar.SECOND, -2);
+        return calendar.getTime();
     }
 
     public static boolean isInCurrentMonthYear(Date date) {
