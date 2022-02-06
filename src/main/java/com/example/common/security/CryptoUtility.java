@@ -8,7 +8,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
@@ -18,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
@@ -27,7 +27,8 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
@@ -42,6 +43,7 @@ public class CryptoUtility implements Serializable {
     private final static String LINE_SEPARATOR = System.getProperty("line.separator");
     private final static String SIGNATURE_ALGORITHM = "SHA1WithRSA";
     private final static String PUBLIC_KEY_ALGORITHM = "RSA";
+    private final static int KEY_SIZE = 4096;
 
     private static KeyStore keyStore;
     private static String ksFile;
@@ -69,6 +71,10 @@ public class CryptoUtility implements Serializable {
     private CryptoUtility() {
     }
 
+    /**
+     * Fetch the KeyStore Object if keystore file is found
+     * If not found, creates a new keystore and returns it.
+     **/
     private static KeyStore getKeyStore(@NotNull String file, @NotNull String password) throws KeyStoreException {
         if (file == null) throw new RuntimeException("Must provide keystore file path!");
         if (password == null) throw new RuntimeException("Keystore password can't be null!");
@@ -90,7 +96,7 @@ public class CryptoUtility implements Serializable {
         return keyStore;
     }
 
-    private static void writeKeyStore(KeyStore keyStore, String file, char[] pwdArray, boolean update) {
+    private static void writeKeyStore(@NotNull KeyStore keyStore, @NotNull String file, char[] pwdArray, boolean update) {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             if (!update)
                 keyStore.load(null, pwdArray);
@@ -101,6 +107,9 @@ public class CryptoUtility implements Serializable {
         }
     }
 
+    /**
+     * Symmetric Key Cryptography
+     */
     public CryptoUtility storeSymmetricKey(@NotNull String alias, @NotNull String key, @NotNull String password) {
         if (key == null) throw new RuntimeException("Key can't be null");
         if (password == null) throw new RuntimeException("Key password can't be null!");
@@ -121,15 +130,6 @@ public class CryptoUtility implements Serializable {
         return CryptoUtilityLoader.INSTANCE;
     }
 
-    public AsymmetricKeyCredentials getKeyCredentials(@NotNull String alias, @NotNull String password) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-        Certificate cert = keyStore.getCertificate(alias);
-        return new AsymmetricKeyCredentials(
-                Base64.getEncoder().encodeToString(keyStore.getKey(alias, password.toCharArray()).getEncoded()),
-                Base64.getEncoder().encodeToString(cert.getPublicKey().getEncoded()),
-                cert
-        );
-    }
-
     public String retrieveSymmetricKey(@NotNull String alias, @NotNull String password) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
         Key key = keyStore.getKey(alias, password.toCharArray());
         if (key == null) return null;
@@ -137,10 +137,14 @@ public class CryptoUtility implements Serializable {
         return new String(key.getEncoded());
     }
 
+
+    /**
+     * Asymmetric Key Cryptography
+     */
     public KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException {
         // generate a key pair
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(PUBLIC_KEY_ALGORITHM, "BC");
-        keyPairGenerator.initialize(4096, new SecureRandom());
+        keyPairGenerator.initialize(KEY_SIZE, new SecureRandom());
         return keyPairGenerator.generateKeyPair();
     }
 
@@ -172,7 +176,7 @@ public class CryptoUtility implements Serializable {
                         + ", L=" + info.getCity()
                         + ", ST=" + info.getState()
                         + ", C=" + info.getCountry()
-                + ", UID="+info.getUserId()
+                        + ", UID=" + info.getUserId()
         );
         JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
                 dnName, certSerialNumber, startDate, endDate, dnName, keyPair.getPublic()
@@ -198,6 +202,23 @@ public class CryptoUtility implements Serializable {
         return certChain[0];
     }
 
+    public Key getKey(@NotNull String alias, @NotNull String password) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
+        return keyStore.getKey(alias, password.toCharArray());
+    }
+
+    public Certificate getCert(String alias) throws KeyStoreException {
+        return keyStore.getCertificate(alias);
+    }
+
+    public AsymmetricKeyCredentials getKeyCredentials(@NotNull String alias, @NotNull String password) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
+        Certificate cert = keyStore.getCertificate(alias);
+        return new AsymmetricKeyCredentials(
+                Base64.getEncoder().encodeToString(keyStore.getKey(alias, password.toCharArray()).getEncoded()),
+                Base64.getEncoder().encodeToString(cert.getPublicKey().getEncoded()),
+                cert
+        );
+    }
+
     public File writeCertToFile(@NotNull final Certificate certificate, @NotNull String fileName) throws CertificateEncodingException, IOException {
         final Base64.Encoder encoder = Base64.getMimeEncoder(64, LINE_SEPARATOR.getBytes());
 
@@ -210,30 +231,56 @@ public class CryptoUtility implements Serializable {
         return file;
     }
 
-    public String sign(@NotNull String keyAlias, @NotNull String keyPassword, @NotNull String message) throws NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, InvalidKeyException, SignatureException {
-        byte[] data = message.getBytes(StandardCharsets.UTF_8);
+    /**
+     * Digital Signature
+     */
+    public byte[] sign(@NotNull String keyAlias, @NotNull String keyPassword, @NotNull byte[] data) throws NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, InvalidKeyException, SignatureException {
 
         Signature sig = Signature.getInstance(SIGNATURE_ALGORITHM);
         sig.initSign((PrivateKey) keyStore.getKey(keyAlias, keyPassword.toCharArray()));
         sig.update(data);
         byte[] signatureBytes = sig.sign();
-        String signature = Base64.getEncoder().encodeToString(signatureBytes);
-        logger.debug("Signature:" + signature);
-
         Certificate cert = keyStore.getCertificate(keyAlias);
         sig.initVerify(cert.getPublicKey());
         sig.update(data);
 
-        return sig.verify(signatureBytes) ? signature : null;
+        return sig.verify(signatureBytes) ? signatureBytes : null;
     }
 
-    public boolean verifySign(@NotNull String keyAlias, @NotNull String signature, @NotNull String message) throws KeyStoreException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+    public boolean verifySignature(@NotNull String keyAlias, @NotNull byte[] signature, @NotNull byte[] data) throws KeyStoreException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
         Certificate cert = keyStore.getCertificate(keyAlias);
         Signature sig = Signature.getInstance(SIGNATURE_ALGORITHM);
         sig.initVerify(cert.getPublicKey());
-        sig.update(message.getBytes(StandardCharsets.UTF_8));
-        byte[] signatureBytes = Base64.getDecoder().decode(signature);
-        return sig.verify(signatureBytes);
+        sig.update(data);
+        return sig.verify(signature);
     }
+
+    /**
+     * Encryption/Decryption
+     */
+    public byte[] encrypt(byte[] publicKey, byte[] dataToEncrypt)
+            throws Exception {
+
+        PublicKey key = KeyFactory.getInstance(PUBLIC_KEY_ALGORITHM)
+                .generatePublic(new X509EncodedKeySpec(publicKey));
+
+        Cipher cipher = Cipher.getInstance(PUBLIC_KEY_ALGORITHM);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        return cipher.doFinal(dataToEncrypt);
+    }
+
+    public byte[] decrypt(byte[] privateKey, byte[] encryptedData)
+            throws Exception {
+
+        PrivateKey key = KeyFactory.getInstance(PUBLIC_KEY_ALGORITHM)
+                .generatePrivate(new PKCS8EncodedKeySpec(privateKey));
+
+        Cipher cipher = Cipher.getInstance(PUBLIC_KEY_ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+
+        return cipher.doFinal(encryptedData);
+    }
+
 
 }

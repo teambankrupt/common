@@ -41,9 +41,9 @@ public class AsymmetricKeyCredentials {
     @Override
     public String toString() {
         return "AsymmetricKeyCredentials{" +
-                "privateKey='" + privateKey + '\'' +
-                ", publicKey='" + publicKey + '\'' +
-                ", cert=" + this.getCertEncoded() +
-                '}';
+                "\nprivateKey=\n" + privateKey + "\n\n" +
+                "publicKey=\n" + publicKey + "\n\n" +
+                "cert=\n" + this.getCertEncoded() +
+                "\n}";
     }
 }
