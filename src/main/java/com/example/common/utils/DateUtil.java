@@ -1,6 +1,7 @@
 package com.example.common.utils;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.DateFormat;
 import java.text.Format;
@@ -189,10 +190,24 @@ public final class DateUtil {
         return date;
     }
 
-    public static Map<DateRangeType, Calendar> buildDateRange(Period period) {
+    public static Map<DateRangeType, Calendar> buildDateRange(Periods period) {
         DateTimeUtil datetimeUtil = new DateTimeUtil(Calendar.getInstance());
         Calendar dateFrom, dateTo;
         switch (period) {
+            case TODAY:
+                dateFrom = Calendar.getInstance();
+                dateTo = Calendar.getInstance();
+                dateFrom.setTime(getDayStart(new Date()));
+                dateTo.setTime(getDayEnd(new Date()));
+                break;
+            case THIS_WEEK:
+                dateFrom = datetimeUtil.getThisWeekStartDate();
+                dateTo = datetimeUtil.getThisWeekEndDate();
+                break;
+            case LAST_WEEK:
+                dateFrom = datetimeUtil.getLastWeekStartDate();
+                dateTo = datetimeUtil.getLastWeekEndDate();
+                break;
             case THIS_MONTH:
                 dateFrom = datetimeUtil.getThisMonthStartDate();
                 dateTo = datetimeUtil.getThisMonthEndDate();
@@ -378,10 +393,10 @@ public final class DateUtil {
 //    }
 
     public enum DateRangeType {
-        DATE_FROM("dateFrom"),
-        DATE_TO("dateTo");
+        DATE_FROM("date_from"),
+        DATE_TO("date_to");
 
-        private String value;
+        private final String value;
 
 
         DateRangeType(String value) {
@@ -394,26 +409,32 @@ public final class DateUtil {
 
     }
 
-    public enum Period {
-        THIS_MONTH, LAST_MONTH, THIS_YEAR, LAST_YEAR, ALL_TIME
+    public enum Periods {
+        TODAY, THIS_WEEK, LAST_WEEK, THIS_MONTH, LAST_MONTH, THIS_YEAR, LAST_YEAR, ALL_TIME
     }
 
     public enum Months {
         JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER
     }
 
-    public static Period getPeriod(String period) {
+    public static Periods getPeriod(String period) {
         switch (period) {
+            case "today":
+                return Periods.TODAY;
+            case "this_week":
+                return Periods.THIS_WEEK;
+            case "last_week":
+                return Periods.LAST_WEEK;
             case "this_month":
-                return Period.THIS_MONTH;
+                return Periods.THIS_MONTH;
             case "last_month":
-                return Period.LAST_MONTH;
+                return Periods.LAST_MONTH;
             case "this_year":
-                return Period.THIS_YEAR;
+                return Periods.THIS_YEAR;
             case "last_year":
-                return Period.LAST_YEAR;
+                return Periods.LAST_YEAR;
             default:
-                return Period.ALL_TIME;
+                return Periods.ALL_TIME;
         }
     }
 

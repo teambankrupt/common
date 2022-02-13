@@ -97,8 +97,7 @@ public class DateTimeUtil {
     public Calendar getThisWeekEndDate() {
         Calendar date = getThisWeekStartDate();
         date.add(Calendar.DAY_OF_YEAR, 6);
-        date = getEndOfDay(date);
-        return date;
+        return getEndOfDay(date);
     }
 
 
