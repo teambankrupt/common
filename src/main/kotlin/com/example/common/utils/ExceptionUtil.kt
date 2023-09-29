@@ -3,6 +3,7 @@ package com.example.common.utils
 import com.example.common.exceptions.exists.AlreadyExistsException
 import com.example.common.exceptions.forbidden.ForbiddenException
 import com.example.common.exceptions.invalid.InvalidException
+import com.example.common.exceptions.notacceptable.NotAcceptableException
 import com.example.common.exceptions.notfound.NotFoundException
 
 /**
@@ -20,6 +21,9 @@ class ExceptionUtil {
 
         fun forbidden(message: String): ForbiddenException {
             return ForbiddenException(message)
+        }
+        fun notAcceptable(message: String): NotAcceptableException {
+            return NotAcceptableException(message)
         }
 
         fun notFound(message: String): NotFoundException {
