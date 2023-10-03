@@ -1,6 +1,7 @@
 package com.example.common.utils
 
 import com.example.common.exceptions.exists.AlreadyExistsException
+import com.example.common.exceptions.exists.not.NotExistsException
 import com.example.common.exceptions.forbidden.ForbiddenException
 import com.example.common.exceptions.invalid.InvalidException
 import com.example.common.exceptions.notacceptable.NotAcceptableException
@@ -22,12 +23,17 @@ class ExceptionUtil {
         fun forbidden(message: String): ForbiddenException {
             return ForbiddenException(message)
         }
+
         fun notAcceptable(message: String): NotAcceptableException {
             return NotAcceptableException(message)
         }
 
         fun notFound(message: String): NotFoundException {
             return NotFoundException(message)
+        }
+        
+        fun notExists(message: String, headers: Map<String, Set<String>> = mapOf()): NotExistsException {
+            return NotExistsException(message, headers)
         }
 
         fun notFound(entityName: String, id: Long): NotFoundException {
