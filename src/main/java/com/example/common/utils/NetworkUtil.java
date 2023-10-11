@@ -9,23 +9,27 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class NetworkUtil {
 
-    public static void postData(String url, String body, String authorization) throws IOException {
+    public static void postData(String url, String body, String authorization, boolean ignoreCert) throws IOException {
         new Thread(() -> {
-
-            CloseableHttpClient client = HttpClients.createDefault();
             String newUrl = url.replace(" ", "%20");
             HttpPost httpPost = new HttpPost(newUrl);
 
@@ -36,17 +40,24 @@ public final class NetworkUtil {
                 httpPost.setHeader("Content-type", "application/json");
                 httpPost.setHeader("Authorization", authorization);
             }
+
             try {
+                CloseableHttpClient client = ignoreCert ?
+                        HttpClients.custom().setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
+                                        .loadTrustMaterial(null, new TrustSelfSignedStrategy())
+                                        .build()
+                                )
+                        ).build()
+                        : HttpClients.createDefault();
+
                 CloseableHttpResponse response = client.execute(httpPost);
                 client.close();
                 response.close();
-            } catch (IOException ignored) {
-
+            } catch (IOException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+                throw new RuntimeException(e);
             }
 
         }).start();
-//        HttpEntity e = response.getEntity();
-//        InputStream is = e.getContent();
     }
 
     public static CloseableHttpResponse postFormData(String url, String authorization, Map<String, String> bodyParams) throws IOException {
@@ -131,8 +142,8 @@ public final class NetworkUtil {
             System.out.println(jsonString);
             client.close();
             response.close();
-        } catch (IOException ignored) {
-
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
         return jsonString;
     }
