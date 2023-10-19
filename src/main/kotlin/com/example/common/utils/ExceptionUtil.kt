@@ -36,6 +36,11 @@ class ExceptionUtil {
             return NotExistsException(message, headers)
         }
 
+
+        fun alreadyExists(message: String, headers: Map<String, Set<String>> = mapOf()): NotExistsException {
+            return NotExistsException(message, headers)
+        }
+
         fun notFound(entityName: String, id: Long): NotFoundException {
             return NotFoundException("Could not find $entityName with id: $id")
         }
