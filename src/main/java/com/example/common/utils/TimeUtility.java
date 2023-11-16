@@ -36,14 +36,13 @@ public class TimeUtility {
     }
 
     public static Instant getDayStart(Instant instant) {
-        LocalDate localDate = LocalDateTime.ofInstant(instant, ZoneOffset.UTC).toLocalDate();
-        return localDate.atStartOfDay().toInstant(ZoneOffset.UTC);
+        LocalDate localDate = LocalDateTime.ofInstant(instant, ZoneOffset.systemDefault()).toLocalDate();
+        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
     }
 
     public static Instant getDayEnd(Instant instant) {
-        return instant
-                .plus(1, ChronoUnit.DAYS)
-                .truncatedTo(ChronoUnit.DAYS)
+        return getDayStart(instant)
+                .plus(24, ChronoUnit.HOURS)
                 .minusMillis(1);
     }
 
