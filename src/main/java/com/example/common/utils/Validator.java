@@ -28,14 +28,13 @@ public final class Validator {
     public static boolean isValidPhoneNumber(@NotNull String region, @NotNull String phone) {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
-        Phonenumber.PhoneNumber phoneNumber = null;
+        Phonenumber.PhoneNumber phoneNumber;
         try {
-            //BD is default country code for Bangladesh (used for number without 880 at the begginning)
             phoneNumber = phoneUtil.parse(phone, region);
         } catch (NumberParseException e) {
-            System.err.println("NumberParseException was thrown: " + e.toString());
+            return false;
         }
-        return phoneUtil.isValidNumber(phoneNumber); // returns true
+        return phoneUtil.isValidNumber(phoneNumber);
     }
 
     public static boolean isValidEmail(@NotNull String email) {
