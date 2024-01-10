@@ -1,4 +1,4 @@
-package com.example.common.misc
+package com.example.common.utils
 
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
