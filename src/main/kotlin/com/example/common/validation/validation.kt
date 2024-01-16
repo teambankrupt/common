@@ -22,6 +22,7 @@ fun <T> genericValidation(
     message: String? = null,
     instruction: String = "",
     scopes: Set<ValidationScope>,
+    exception: Throwable? = null,
     valid: (data: T) -> Boolean
 ): ValidationV2<T> =
     object : ValidationV2<T> {
@@ -31,7 +32,7 @@ fun <T> genericValidation(
                 data.right()
             } else {
                 Err.ValidationErr
-                    .GenericValidationErr(RuntimeException(message ?: "$data is invalid"), instruction)
+                    .GenericValidationErr(exception ?: RuntimeException(message ?: "$data is invalid"), instruction)
                     .left()
             }
 
