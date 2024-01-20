@@ -23,5 +23,8 @@ public class SessionIdentifierGenerator {
     public static String alphanumeric(int size) {
         return RandomStringUtils.randomAlphanumeric(size);
     }
+    public static String numeric(int size) {
+        return RandomStringUtils.randomNumeric(size);
+    }
 
 }
