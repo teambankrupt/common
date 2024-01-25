@@ -12,10 +12,27 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import javax.imageio.ImageIO
 
+enum class BarcodeType {
+    QR_CODE, BARCODE
+}
 
 class BarcodeUtility {
 
     companion object {
+
+        fun barcode(data: String, height: Int, width: Int): File {
+            val hints: MutableMap<EncodeHintType, Any> = EnumMap(com.google.zxing.EncodeHintType::class.java)
+//            hints[EncodeHintType.CHARACTER_SET] = "UTF-8"
+            hints[EncodeHintType.MARGIN] = 2
+
+            val matrix = MultiFormatWriter().encode(data, BarcodeFormat.CODABAR, width, height, hints)
+            val file = File.createTempFile("barcode", ".png")
+            MatrixToImageWriter.writeToFile(
+                    matrix,
+                    file.path.substring(file.path.lastIndexOf('.') + 1),
+                    file)
+            return file
+        }
 
         fun generate(barcodeFormat: BarcodeFormat, data: Map<String, Any>, height: Int, width: Int): File {
             val hints: MutableMap<EncodeHintType, Any> = EnumMap(com.google.zxing.EncodeHintType::class.java)
