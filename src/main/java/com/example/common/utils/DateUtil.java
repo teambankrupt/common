@@ -133,6 +133,24 @@ public final class DateUtil {
 		}
 	}
 
+	public static Collection<Date> datesFromTodayToOneYearBack(int field, int amount) {
+		Calendar calendar = Calendar.getInstance();
+		Date endDate = calendar.getTime(); // today
+		calendar.add(Calendar.YEAR, -1);
+		Date startDate = calendar.getTime(); // one year back
+
+		Collection<Date> dates = new ArrayList<>();
+		Date currentDate = (Date) startDate.clone();
+
+		while (currentDate.before(endDate) || currentDate.equals(endDate)) {
+			dates.add((Date) currentDate.clone());
+			calendar.setTime(currentDate);
+			calendar.add(field, amount);
+			currentDate.setTime(calendar.getTimeInMillis());
+		}
+		return dates;
+	}
+
 	public static Date getDayStart(Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
