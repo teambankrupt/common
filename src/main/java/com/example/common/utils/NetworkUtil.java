@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -19,6 +20,7 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -64,27 +66,35 @@ public final class NetworkUtil {
         CloseableHttpClient client = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url.replace(" ", "%20"));
         httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        httpPost.setHeader("Authorization", authorization);
+        if (authorization != null && !authorization.isEmpty()) {
+            httpPost.setHeader("Authorization", authorization);
+        }
 
         List<NameValuePair> params = bodyParams
                 .entrySet()
                 .stream()
                 .map(e -> new BasicNameValuePair(e.getKey(), e.getValue())).collect(Collectors.toList());
-        httpPost.setEntity(new UrlEncodedFormEntity(params));
+        httpPost.setEntity(new UrlEncodedFormEntity(params, StandardCharsets.UTF_8));
 
         return client.execute(httpPost);
     }
 
-    public static CloseableHttpResponse postFormData(String url, String authorization, List<DuplicateParamEntry> bodyParams) throws IOException {
+    public static CloseableHttpResponse postFormData(
+            String url, String authorization,
+            List<DuplicateParamEntry> bodyParams,
+            ContentType contentType
+    ) throws IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url.replace(" ", "%20"));
-        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        httpPost.setHeader("Authorization", authorization);
+        httpPost.setHeader("Content-Type", contentType.getMimeType());
+        if (authorization != null && !authorization.isEmpty()) {
+            httpPost.setHeader("Authorization", authorization);
+        }
 
         List<NameValuePair> params = bodyParams
                 .stream()
                 .map(a -> new BasicNameValuePair(a.getKey(), a.getValue())).collect(Collectors.toList());
-        httpPost.setEntity(new UrlEncodedFormEntity(params));
+        httpPost.setEntity(new UrlEncodedFormEntity(params, StandardCharsets.UTF_8));
 
         return client.execute(httpPost);
     }
