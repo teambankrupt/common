@@ -45,6 +45,13 @@ public final class Validator {
         return isValid(username, "^[a-zA-Z0-9]([._-](?![._-])|[a-zA-Z0-9]){3,18}[a-zA-Z0-9]$");
     }
 
+    public static boolean isValidDomain(String domain) {
+        return isValid(
+                domain,
+                "^((?!-))(xn--)?[a-z0-9][a-z0-9-_]{0,61}[a-z0-9]{0,1}\\.(xn--)?([a-z0-9\\-]{1,61}|[a-z0-9-]{1,30}\\.[a-z]{2,})$"
+        );
+    }
+
     private static boolean isValid(String input, String regex) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
