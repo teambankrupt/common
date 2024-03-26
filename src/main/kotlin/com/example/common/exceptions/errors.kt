@@ -24,6 +24,8 @@ sealed class Err(val throwable: Throwable) {
         data object ForbiddenErr : OperationErr(ForbiddenException("You are not allowed to perform this action."))
         data object ConstraintViolationErr :
             OperationErr(RuntimeException("Couldn't perform the action due to unresolved constraints."))
+        data class NotAllowedErr(val instruction: String) :
+            OperationErr(RuntimeException("Operation not allowed. $instruction"))
     }
 
     class UserErr(ex: Throwable) : Err(ex)
