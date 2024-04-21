@@ -20,6 +20,7 @@ sealed class Err(val throwable: Throwable) {
 
     sealed class OperationErr(throwable: Throwable) : Err(throwable) {
         data class NonExistentErr(val id: Long) : OperationErr(NotFoundException("Item not found with id $id"))
+        data class NonExistentErrWithMsg(val msg: String) : OperationErr(NotFoundException(msg))
         data object UnavailableErr : OperationErr(NotFoundException("Item not available."))
         data object ForbiddenErr : OperationErr(ForbiddenException("You are not allowed to perform this action."))
         data object ConstraintViolationErr :
