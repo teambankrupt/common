@@ -1,8 +1,8 @@
 package com.example.common.utils
 
-import com.google.common.base.Predicate
 import org.owasp.html.HtmlPolicyBuilder
 import org.owasp.html.PolicyFactory
+import java.util.function.Predicate
 import java.util.regex.Pattern
 
 object HtmlSanitizer {
