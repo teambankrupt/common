@@ -3,7 +3,6 @@ package com.example.common.utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.Normalizer;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,12 +27,21 @@ public class TextUtility {
 	}
 
 	public static String slugify(@NotNull String input) {
+		// Replace whitespace with dashes
 		String nowhitespace = WHITESPACE.matcher(input).replaceAll("-");
-		String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
-		String slug = NONLATIN.matcher(normalized).replaceAll("");
+
+		// Normalize the string to ensure consistent encoding (UTF-8 safe)
+		String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFC);
+
+		// Remove all non-alphanumeric characters except dashes, allowing all UTF-8 letters and numbers
+		String slug = normalized.replaceAll("[^\\p{L}\\p{N}\\-]", "");
+
+		// Remove dashes from the edges
 		slug = EDGESDHASHES.matcher(slug).replaceAll("");
-		return slug.toLowerCase(Locale.ENGLISH);
+
+		return slug.toLowerCase();
 	}
+
 
 	public static boolean isValidDomain(String domain) {
 		return Pattern
