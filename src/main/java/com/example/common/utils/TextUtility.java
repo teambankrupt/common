@@ -31,7 +31,7 @@ public class TextUtility {
 		String nowhitespace = WHITESPACE.matcher(input).replaceAll("-");
 
 		// Normalize the string to ensure consistent encoding (UTF-8 safe)
-		String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFC);
+		String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
 
 		// Remove all non-alphanumeric characters except dashes, allowing all UTF-8 letters and numbers
 		String slug = normalized.replaceAll("[^\\p{L}\\p{N}\\-]", "");
