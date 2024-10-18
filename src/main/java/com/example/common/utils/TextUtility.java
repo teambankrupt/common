@@ -31,7 +31,7 @@ public class TextUtility {
 		String nowhitespace = WHITESPACE.matcher(input).replaceAll("-");
 
 		// Normalize the string to ensure consistent encoding (UTF-8 safe)
-		String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
+		String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFC);
 
 		// Remove all non-alphanumeric characters except dashes, allowing all UTF-8 letters and numbers
 		String slug = normalized.replaceAll("[^\\p{L}\\p{N}\\-]", "");
@@ -40,6 +40,19 @@ public class TextUtility {
 		slug = EDGESDHASHES.matcher(slug).replaceAll("");
 
 		return slug.toLowerCase();
+	}
+
+	public static String codify(String text) {
+		if (text == null || text.isEmpty()) return "";
+
+		// Replace spaces with dashes
+		text = text.replaceAll("\\s+", "-");
+		// Keep Unicode letters, numbers, dashes, and Bengali characters
+		text = text.replaceAll("[^\\p{L}\\p{N}\\u0980-\\u09FF-]+", "");
+		// Replace multiple dashes with a single dash
+		text = text.replaceAll("-{2,}", "-");
+		// Trim dashes from both ends
+		return text.replaceAll("^-+|-+$", "");
 	}
 
 
